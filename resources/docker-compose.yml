@@ -1,0 +1,58 @@
+version: '3'
+services:
+  hdfs-name:
+    image: cybermaggedon/hadoop:2.9.2
+    command: /start-namenode
+    ports:
+      - 50070:50070
+      - 50075:50075
+      - 50090:50090
+      - 9000:9000
+  hdfs-data:
+    image: cybermaggedon/hadoop:2.9.2
+    command: /start-datanode
+    environment:
+      NAMENODE_URI: hdfs://hdfs-name:9000
+    depends_on:
+      - hdfs-name
+  zookeeper:
+    image: zookeeper:3.4.14
+    ports:
+      - 2181:2181
+  accumulo-cluster:
+    image: cybermaggedon/accumulo:1.9.3
+    environment:
+      ZOOKEEPERS: zookeeper
+      HDFS_VOLUMES: hdfs://hdfs-name:9000/accumulo
+      NAMENODE_URI: hdfs://hdfs-name:9000/
+    ports:
+      - 50095:50095
+      - 42424:42424
+      - 9995:9995
+    depends_on:
+      - zookeeper
+      - hdfs-name
+      - hdfs-data
+  accumulo-proxy:
+    image: cybermaggedon/accumulo:1.9.3
+    command: >
+      bash -c "sleep 45s
+      && echo 'useMockInstance=false' > /usr/local/accumulo/proxy/proxy.properties
+      && echo 'useMiniAccumulo=false' >> /usr/local/accumulo/proxy/proxy.properties
+      && echo 'protocolFactory=org.apache.thrift.protocol.TBinaryProtocol$$Factory' >> /usr/local/accumulo/proxy/proxy.properties
+      && echo 'tokenClass=org.apache.accumulo.core.client.security.tokens.PasswordToken' >> /usr/local/accumulo/proxy/proxy.properties
+      && echo 'port=45000' >> /usr/local/accumulo/proxy/proxy.properties
+      && echo 'maxFrameSize=16M' >> /usr/local/accumulo/proxy/proxy.properties
+      && echo 'instance=accumulo' >> /usr/local/accumulo/proxy/proxy.properties
+      && echo 'zookeepers=zookeeper:2181' >> /usr/local/accumulo/proxy/proxy.properties
+      && /usr/local/accumulo/bin/accumulo proxy -p /usr/local/accumulo/proxy/proxy.properties"
+    environment:
+      HADOOP_MASTER_ADDRESS: hdfs-name:9000
+      ZOOKEEPERS: zookeeper
+    ports:
+      - 45000:45000
+    depends_on:
+      - zookeeper
+      - accumulo-cluster
+      - hdfs-name
+      - hdfs-data
