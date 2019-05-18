@@ -1,6 +1,6 @@
 import asyncio
 from contextlib import asynccontextmanager
-from accumulator import Accumulator
+from aioaccumulator import Accumulator
 
 
 class AccumulatorPool:

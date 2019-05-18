@@ -7,7 +7,7 @@ from io import BytesIO
 from thriftpy2.contrib.aio.transport.buffered import readall
 from thriftpy2.transport import TTransportBase
 
-
+# TODO nsokil this is a homegrown extension for thriftpy2, will open a PR and then dispose of this class
 class TAsyncFramedTransport(TTransportBase):
     def __init__(self, trans):
         self._trans = trans

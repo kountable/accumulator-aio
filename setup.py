@@ -1,7 +1,7 @@
 import setuptools
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
+with open("README.md", "r") as rmd:
+    long_description = rmd.read()
 
 setuptools.setup(
     name="accumulator-aio",
@@ -19,8 +19,10 @@ setuptools.setup(
         'thriftpy2',
     ],
     classifiers=[
-        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3 :: Only",
+        "Programming Language :: Python :: 3.7",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
+        "Development Status :: 3 - Alpha"
     ],
 )

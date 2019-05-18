@@ -1,10 +1,10 @@
 import thriftpy2
 from thriftpy2.rpc import make_aio_client
 
-from accumulator._thriftpy_ext_framed_ import TAsyncFramedTransportFactory
+from aioaccumulator._thriftpy_ext_framed_ import TAsyncFramedTransportFactory
 from thriftpy2.contrib.aio.protocol.binary import TAsyncBinaryProtocolFactory
-from accumulator.iterators import *
-from accumulator.objects import Cell, AsyncBatchWriter, Mutation, Range
+from aioaccumulator.iterators import *
+from aioaccumulator.objects import Cell, AsyncBatchWriter, Mutation, Range
 
 
 class Accumulator(object):
