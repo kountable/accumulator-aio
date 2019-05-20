@@ -24,6 +24,9 @@ class Accumulator(object):
         self.login = await self.client.login(
             self._conn_params['user'], {'password': self._conn_params['password']})
 
+    def dispose(self):
+        self.client.close()
+
     async def list_tables(self):
         return await self.client.listTables(self.login)
 
