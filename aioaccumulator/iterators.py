@@ -50,10 +50,11 @@ class BaseCombiner(BaseIterator):
         return {
             "type": self.encoding_type,
             "all": str(self.combine_all_columns).lower(),
-            "columns": ",".join([self._encode_column(col) for col in self.columns])
+            "columns": ",".join([BaseCombiner._encode_column(col) for col in self.columns])
         }
 
-    def _encode_column(self, col):
+    @staticmethod
+    def _encode_column(col):
         return col[0] if len(col) == 1 else ":".join(col)
 
 
@@ -181,22 +182,25 @@ class IntersectingIterator(BaseIterator):
 
     def _get_iterator_properties(self):
         props = {
-            "columnFamilies": self._encode_columns(self.terms)
+            "columnFamilies": IntersectingIterator._encode_columns(self.terms)
         }
         if self.not_flags:
-            props["notFlag"] = self._encode_not_flags(self.not_flags)
+            props["notFlag"] = IntersectingIterator._encode_not_flags(self.not_flags)
         return props
 
-    def _encode_columns(self, cols):
+    @staticmethod
+    def _encode_columns(cols):
         return "".join([col.encode("base64") for col in cols]).rstrip()
 
-    def _encode_not_flags(self, flags):
+    @staticmethod
+    def _encode_not_flags(flags):
         if flags:
-            return "".join([self._convert_flag(flag) for flag in flags]).encode("base64")
+            return "".join([IntersectingIterator._convert_flag(flag) for flag in flags]).encode("base64")
         else:
             return None
 
-    def _convert_flag(self, flag):
+    @staticmethod
+    def _convert_flag(flag):
         if flag == 0:
             return "\0"
         elif flag == 1:

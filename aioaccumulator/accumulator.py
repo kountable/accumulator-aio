@@ -79,8 +79,8 @@ class Accumulator(object):
             self, table, self.thrift.WriterOptions(
                 maxMemory=max_memory, latencyMs=latency_ms, timeoutMs=timeout_ms, threads=threads))
 
-    async def delete_rows(self, table, srow, erow):
-        await self.client.deleteRows(self.login, table, srow, erow)
+    async def delete_rows(self, table, start_row, end_row):
+        await self.client.deleteRows(self.login, table, start_row, end_row)
 
     async def attach_iterator(self, table, setting, scopes):
         await self.client.attachIterator(self.login, table, setting, scopes)
@@ -91,8 +91,10 @@ class Accumulator(object):
     async def following_key(self, key, part):
         return await self.client.getFollowing(key, part)
 
-    async def get_max_row(self, table, auths=None, srow=None, sinclude=None, erow=None, einclude=None):
-        return await self.client.getMaxRow(self.login, table, auths, srow, sinclude, erow, einclude)
+    async def get_max_row(self, table, authorizations=None, start_row=None,
+                          start_inclusive=None, end_row=None, end_inclusive=None):
+        return await self.client.getMaxRow(
+            self.login, table, authorizations, start_row, start_inclusive, end_row, end_inclusive)
 
     def create_mutation(self, row):
         return Mutation(row, self.thrift)
@@ -114,8 +116,8 @@ class Accumulator(object):
     async def list_users(self):
         return await self.client.listLocalUsers(self.login)
 
-    async def set_user_authorizations(self, user, auths):
-        await self.client.changeUserAuthorizations(self.login, user, auths)
+    async def set_user_authorizations(self, user, authorizations):
+        await self.client.changeUserAuthorizations(self.login, user, authorizations)
 
     async def get_user_authorizations(self, user):
         return await self.client.getUserAuthorizations(self.login, user)
@@ -183,11 +185,22 @@ class Accumulator(object):
             return None
 
     # # # # # # # # # # HELPER FACTORY METHODS FOR DIFFERENT OBJECT TYPES # # # # # # # # # #
-    def range(self, srow=None, scf=None, scq=None,
-              scv=None, sts=None, sinclude=True,
-              erow=None, ecf=None, ecq=None,
-              ecv=None, ets=None, einclude=True) -> Range:
-        return Range(self.thrift, srow, scf, scq, scv, sts, sinclude, erow, ecf, ecq, ecv, ets, einclude)
+    def range(self,
+              start_row=None,
+              start_col_fam=None,
+              start_col_qual=None,
+              start_col_vis=None,
+              start_timestamp=None,
+              start_inclusive=True,
+              end_row=None,
+              end_col_fam=None,
+              end_col_qual=None,
+              end_col_vis=None,
+              end_timestamp=None,
+              end_inclusive=True
+              ) -> Range:
+        return Range(self.thrift, start_row, start_col_fam, start_col_qual, start_col_vis, start_timestamp,
+                     start_inclusive, end_row, end_col_fam, end_col_qual, end_col_vis, end_timestamp, end_inclusive)
 
     def mutation(self, row) -> Mutation:
         return Mutation(self.thrift, row)
@@ -224,6 +237,6 @@ class Accumulator(object):
         return IntersectingIterator(thrift=self.thrift, terms=terms, not_flags=not_flags, priority=priority)
 
     def indexed_doc_iterator(self, terms, not_flags=None, priority=10,
-                             index_colf='i', doc_colf='e') -> IndexedDocIterator:
+                             index_col_fam='i', doc_col_fam='e') -> IndexedDocIterator:
         return IndexedDocIterator(thrift=self.thrift, terms=terms, not_flags=not_flags, priority=priority,
-                                  index_colf=index_colf, doc_colf=doc_colf)
+                                  index_colf=index_col_fam, doc_colf=doc_col_fam)

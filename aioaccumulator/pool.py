@@ -6,6 +6,11 @@ from typing import List
 
 class AccumulatorPool:
     def __init__(self, host, port, user, password, schema, max_size=10, min_size=1):
+        """
+        :param schema: Path to Thrift schema file
+        :param max_size: Maximum connections
+        :param min_size: Minimum connections (pool shrinks if demand is low)
+        """
         self._conn_params = {'host': host, 'port': port, 'user': user, 'password': password, 'schema': schema}
         self._max_size = max_size
         self._min_size = min_size if min_size is not None and min_size > 0 else 1
@@ -17,6 +22,16 @@ class AccumulatorPool:
 
     @asynccontextmanager
     async def get(self):
+        """
+        Example usage:
+            pool = AccumulatorPool(...)
+            async with pool.get() as conn:
+                tables = conn.list_tables()
+
+            # use "tables" here, the connection will be returned to the pool after exiting with: block
+
+        :return: Accumulator as a context manager
+        """
         conn = await self._check_out()
         yield conn
         await self._check_in(conn)
