@@ -46,8 +46,8 @@ class Accumulator(object):
         if not isinstance(mutations, list) and not isinstance(mutations, tuple):
             mutations = [mutations]
         writer = await self.create_batch_writer(table)
-        writer.add_mutations(mutations)
-        writer.close()
+        await writer.add_mutations(mutations)
+        await writer.close()
 
     async def scan(self, table, scanrange=None, cols=None, auths=None, iterators=None, bufsize=None, batchsize=10):
         options = self.thrift.ScanOptions(auths, self._get_range(scanrange), self._get_scan_columns(cols),
